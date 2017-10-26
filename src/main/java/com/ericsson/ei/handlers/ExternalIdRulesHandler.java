@@ -13,9 +13,9 @@ import com.ericsson.ei.waitlist.WaitListStorageHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Component
-public class DownstreamIdRulesHandler {
+public class ExternalIdRulesHandler {
 
-    static Logger log = (Logger) LoggerFactory.getLogger(DownstreamIdRulesHandler.class);
+    static Logger log = (Logger) LoggerFactory.getLogger(ExternalIdRulesHandler.class);
 
     @Autowired
     private JmesPathInterface jmesPathInterface;
@@ -24,7 +24,7 @@ public class DownstreamIdRulesHandler {
     private MatchIdRulesHandler matchIdRulesHandler;
 
     @Autowired
-    private DownstreamExtractionHandler downstreamExtractionHandler;
+    private ExternalExtractionHandler externalExtractionHandler;
 
     @Autowired
     private WaitListStorageHandler waitListStorageHandler;
@@ -42,7 +42,7 @@ public class DownstreamIdRulesHandler {
                  id = idJsonObj.textValue();
                  objects = matchIdRulesHandler.fetchObjectsById(rulesObject, id);
                  for (String object:objects) {
-                     downstreamExtractionHandler.runExtraction(rulesObject, id, event, object);
+                     externalExtractionHandler.runExtraction(rulesObject, id, event, object);
                  }
                  if (objects.size() == 0) {
                      try {

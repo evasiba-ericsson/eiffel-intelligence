@@ -21,9 +21,13 @@ import java.util.concurrent.Executor;
 import javax.annotation.PostConstruct;
 
 @Component
-public class EventHandler {
+public class EventHandler extends EventHandlerBase {
 
     private static Logger log = LoggerFactory.getLogger(EventHandler.class);
+
+    public static Logger getLog() {
+        return log;
+    }
 
     @Autowired
     RulesHandler rulesHandler;
@@ -31,34 +35,8 @@ public class EventHandler {
     @Autowired
     IdRulesHandler idRulesHandler;
 
-    @Autowired
-    DownstreamIdRulesHandler downstreamIdRulesHandler;
-
     public void eventReceived(String event) {
         RulesObject eventRules = rulesHandler.getRulesForEvent(event);
         idRulesHandler.runIdRules(eventRules, event);
-        downstreamIdRulesHandler.runIdRules(eventRules, event);
-    }
-
-    public void eventReceived(byte[] message) {
-        log.info("Thread id " + Thread.currentThread().getId() + " spawned");
-        String actualMessage = new String(message);
-        log.info("Event received <" + actualMessage + ">");
-        eventReceived(actualMessage);
-//        if (System.getProperty("flow.test") == "true") {
-//            String countStr = System.getProperty("eiffel.intelligence.processedEventsCount");
-//            int count = Integer.parseInt(countStr);
-//            count++;
-//            System.setProperty("eiffel.intelligence.processedEventsCount", "" + count);
-//        }
-    }
-
-    @Async
-    public void onMessage(Message message, Channel channel) throws Exception {
-        byte[] messageBody = message.getBody();
-        eventReceived(messageBody);
-        long deliveryTag = message.getMessageProperties().getDeliveryTag();
-        channel.basicAck(deliveryTag, false);
-        int breakHere = 1;
     }
 }

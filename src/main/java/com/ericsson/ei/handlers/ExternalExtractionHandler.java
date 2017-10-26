@@ -12,9 +12,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
-public class DownstreamExtractionHandler {
+public class ExternalExtractionHandler {
 
-    private static Logger log = LoggerFactory.getLogger(DownstreamExtractionHandler.class);
+    private static Logger log = LoggerFactory.getLogger(ExternalExtractionHandler.class);
 
     @Autowired private JmesPathInterface jmesPathInterface;
     @Autowired private DownstreamMergeHandler mergeHandler;
