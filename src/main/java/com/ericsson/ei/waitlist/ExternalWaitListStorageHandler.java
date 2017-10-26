@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class WaitListStorageHandler extends WaitListStorageHandlerBase {
+public class ExternalWaitListStorageHandler extends WaitListStorageHandlerBase {
 
-    @Value("${waitlist.collection.name}") private String collectionName;
+    @Value("${external.waitlist.collection.name}") private String collectionName;
 
-    static Logger log = (Logger) LoggerFactory.getLogger(WaitListStorageHandler.class);
+    static Logger log = (Logger) LoggerFactory.getLogger(ExternalWaitListStorageHandler.class);
 
     public static Logger getLog() {
         return log;
@@ -22,14 +22,14 @@ public class WaitListStorageHandler extends WaitListStorageHandlerBase {
 
     private void updateTestEventCount(boolean increase) {
         if (System.getProperty("flow.test") == "true") {
-            String countStr = System.getProperty("eiffel.intelligence.waitListEventsCount");
+            String countStr = System.getProperty("eiffel.intelligence.external.waitListEventsCount");
             int count = Integer.parseInt(countStr);
             if (increase) {
                 count++;
             } else {
                 count--;
             }
-            System.setProperty("eiffel.intelligence.waitListEventsCount", "" + count);
+            System.setProperty("eiffel.intelligence.external.waitListEventsCount", "" + count);
         }
     }
 }

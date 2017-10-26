@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.ericsson.ei.jmespath.JmesPathInterface;
 import com.ericsson.ei.rules.RulesObject;
-import com.ericsson.ei.waitlist.WaitListStorageHandler;
+import com.ericsson.ei.waitlist.ExternalWaitListStorageHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Component
@@ -27,7 +27,7 @@ public class ExternalIdRulesHandler {
     private ExternalExtractionHandler externalExtractionHandler;
 
     @Autowired
-    private WaitListStorageHandler waitListStorageHandler;
+    private ExternalWaitListStorageHandler waitListStorageHandler;
 
     public void setJmesPathInterface(JmesPathInterface jmesPathInterface) {
         this.jmesPathInterface = jmesPathInterface;

@@ -60,8 +60,8 @@ public class FlowTestBase {
     static AMQPBrokerManager amqpBrocker;
     protected static MongodForTestsFactory testsFactory;
     static MongoClient mongoClient = null;
-    static Queue queue = null;
     static RabbitAdmin admin;
+    static TopicExchange exchange;
 
     public static class AMQPBrokerManager {
         private String path;
@@ -155,7 +155,8 @@ public class FlowTestBase {
             String queueName = rmqHandler.getQueueName();
             Channel channel = conn.createChannel();
             String exchangeName = "ei-poc-4";
-            createExchange(exchangeName, queueName);
+            createExchange(exchangeName);
+            setUpQueues();
 
             ArrayList<String> eventNames = getEventNamesToSend();
             int eventsCount = eventNames.size();
@@ -173,15 +174,27 @@ public class FlowTestBase {
         }
     }
 
-    protected void createExchange(final String exchangeName, final String queueName) {
+    protected void createExchange(final String exchangeName) {
         final CachingConnectionFactory ccf = new CachingConnectionFactory(cf);
         admin = new RabbitAdmin(ccf);
-        queue = new Queue(queueName, false);
-        admin.declareQueue(queue);
-        final TopicExchange exchange = new TopicExchange(exchangeName);
+        exchange = new TopicExchange(exchangeName);
         admin.declareExchange(exchange);
-        admin.declareBinding(BindingBuilder.bind(queue).to(exchange).with("#"));
         ccf.destroy();
+    }
+
+    protected void setUpQueues() {
+        String queueName = rmqHandler.getQueueName();
+        String exteralWaitlisQueueName = rmqHandler.getExternalWaitlistQueueName();
+        String waitlisQueueName = rmqHandler.getWaitlistQueueName();
+        declareAndBindQueue(exteralWaitlisQueueName);
+        declareAndBindQueue(queueName);
+        declareAndBindQueue(waitlisQueueName);
+    }
+
+    protected void declareAndBindQueue(final String queueName) {
+        Queue queue = new Queue(queueName, false);
+        admin.declareQueue(queue);
+        admin.declareBinding(BindingBuilder.bind(queue).to(exchange).with("#"));
     }
 
     protected ArrayList<String> getEventNamesToSend() {

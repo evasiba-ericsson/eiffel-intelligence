@@ -5,17 +5,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.ericsson.ei.rmqhandler.RmqHandler;
+
 @Component
-public class WaitListWorker extends WaitListWorkerBase {
+public class ExternalWaitListWorker extends WaitListWorkerBase {
 
     @Autowired
-    private WaitListStorageHandler waitListStorageHandler;
+    private ExternalWaitListStorageHandler waitListStorageHandler;
 
     public WaitListStorageHandlerBase getWaitlistStorageHandler() {
         return waitListStorageHandler;
     }
 
-    static Logger log = (Logger) LoggerFactory.getLogger(WaitListWorker.class);
+    public void publishToWaitList(RmqHandler rmqHandler, String event) {
+        rmqHandler.publishToExternalWaitlistQueue(event);
+    }
+
+    static Logger log = (Logger) LoggerFactory.getLogger(ExternalWaitListWorker.class);
 
     public static Logger getLog() {
         return log;

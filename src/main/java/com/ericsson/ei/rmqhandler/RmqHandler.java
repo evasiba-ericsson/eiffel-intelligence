@@ -1,6 +1,5 @@
 package com.ericsson.ei.rmqhandler;
 
-import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,9 +9,7 @@ import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.amqp.rabbit.connection.Connection;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.ChannelAwareMessageListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitTemplate.ConfirmCallback;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
@@ -23,7 +20,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.ericsson.ei.handlers.EventHandler;
-import com.rabbitmq.client.Channel;
+import com.ericsson.ei.handlers.EventHandlerBase;
+import com.ericsson.ei.handlers.ExternalEventHandler;
 
 @Component
 public class RmqHandler {
@@ -48,14 +46,17 @@ public class RmqHandler {
     private String componentName;
     @Value("${rabbitmq.waitlist.queue.suffix}")
     private String waitlistSufix;
+    @Value("${rabbitmq.waitlist.external.queue.suffix}")
+    private String externalWaitlistSufix;
     @Value("${rabbitmq.routing.key}")
     private String routingKey;
     @Value("${rabbitmq.consumerName}")
     private String consumerName;
     private RabbitTemplate rabbitTemplate;
+    private RabbitTemplate externalRabbitTemplate;
     private CachingConnectionFactory factory;
     private SimpleMessageListenerContainer container;
-    private SimpleMessageListenerContainer waitlistContainer;
+    private SimpleMessageListenerContainer externalWaitlistContainer;
     static Logger log = (Logger) LoggerFactory.getLogger(RmqHandler.class);
 
     public Boolean getQueueDurable() {
@@ -176,10 +177,24 @@ public class RmqHandler {
     @Bean
     SimpleMessageListenerContainer bindToQueueForRecentEvents(ConnectionFactory factory, EventHandler eventHandler) {
         String queueName = getQueueName();
+        String waitListQueueName = getWaitlistQueueName();
+        container = createMessageListenerContainer(eventHandler, queueName, waitListQueueName);
+        return container;
+    }
+
+    @Bean
+    SimpleMessageListenerContainer bindToExternalQueueForRecentEvents(ConnectionFactory factory, ExternalEventHandler eventHandler) {
+        String queueName = getQueueName();
+        String waitListQueueName = getExternalWaitlistQueueName();
+        externalWaitlistContainer = createMessageListenerContainer(eventHandler, queueName, waitListQueueName);
+        return externalWaitlistContainer;
+    }
+
+    private SimpleMessageListenerContainer createMessageListenerContainer(EventHandlerBase eventHandler, String... queues) {
         MessageListenerAdapter listenerAdapter = new EIMessageListenerAdapter(eventHandler);
-        container = new SimpleMessageListenerContainer();
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(factory);
-        container.setQueueNames(queueName);
+        container.setQueueNames(queues);
         container.setMessageListener(listenerAdapter);
         container.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         return container;
@@ -195,36 +210,63 @@ public class RmqHandler {
         return domainId + "." + componentName + "." + consumerName + "." + durableName + "." + waitlistSufix;
     }
 
+    public String getExternalWaitlistQueueName() {
+        String durableName = queueDurable ? "durable" : "transient";
+        return domainId + "." + componentName + "." + consumerName + "." + durableName + "." + externalWaitlistSufix;
+    }
+
     @Bean
     public RabbitTemplate rabbitMqTemplate() {
         if (rabbitTemplate == null) {
-            if (factory != null) {
-                rabbitTemplate = new RabbitTemplate(factory);
-            } else {
-                rabbitTemplate = new RabbitTemplate(connectionFactory());
-            }
-
-            rabbitTemplate.setExchange(exchangeName);
-            rabbitTemplate.setRoutingKey(routingKey);
-            rabbitTemplate.setQueue(getQueueName());
-            rabbitTemplate.setConfirmCallback(new ConfirmCallback() {
-                @Override
-                public void confirm(CorrelationData correlationData, boolean ack, String cause) {
-                    log.info("Received confirm with result : {}", ack);
-                }
-            });
+            rabbitTemplate = createRMQTemplate(getQueueName());
         }
         return rabbitTemplate;
     }
 
-    public void publishObjectToWaitlistQueue(String message) {
-        log.info("publishing message to message bus...");
+    @Bean
+    public RabbitTemplate externalRabbitMqTemplate() {
+
+        if (externalRabbitTemplate == null) {
+            externalRabbitTemplate = createRMQTemplate(getQueueName());
+        }
+        return externalRabbitTemplate;
+    }
+
+    public RabbitTemplate createRMQTemplate(String queueName) {
+        RabbitTemplate rabbitTemplate;
+
+        if (factory != null) {
+            rabbitTemplate = new RabbitTemplate(factory);
+        } else {
+            rabbitTemplate = new RabbitTemplate(connectionFactory());
+        }
+
+        rabbitTemplate.setExchange(exchangeName);
+        rabbitTemplate.setRoutingKey(routingKey);
+        rabbitTemplate.setQueue(queueName);
+        rabbitTemplate.setConfirmCallback(new ConfirmCallback() {
+            @Override
+            public void confirm(CorrelationData correlationData, boolean ack, String cause) {
+                log.info("Received confirm with result : {}", ack);
+            }
+        });
+
+        return rabbitTemplate;
+    }
+
+    public void publishToWaitlistQueue(String message) {
+        log.info("publishing message to wait list queue...");
         rabbitMqTemplate().convertAndSend(message);
+    }
+
+    public void publishToExternalWaitlistQueue(String message) {
+        log.info("publishing message to external wait list queue...");
+        externalRabbitMqTemplate().convertAndSend(message);
     }
 
     public void close() {
         try {
-            waitlistContainer.destroy();
+            externalWaitlistContainer.destroy();
             container.destroy();
             factory.destroy();
         } catch (Exception e) {
