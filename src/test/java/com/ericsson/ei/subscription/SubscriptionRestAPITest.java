@@ -108,10 +108,10 @@ public class SubscriptionRestAPITest {
         
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
         
-        Subscription subscription = mapper.readValue(result.getResponse().getContentAsString().toString(),
-                Subscription.class);
+        Subscription[] subscription = mapper.readValue(result.getResponse().getContentAsString().toString(),
+                Subscription[].class);
         assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
-        assertEquals("Subscription_Test", subscription.getSubscriptionName());
+        assertEquals("Subscription_Test", subscription[0].getSubscriptionName());
     }
     
     @Test
@@ -124,8 +124,8 @@ public class SubscriptionRestAPITest {
         
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
         
-        assertEquals(HttpStatus.NOT_FOUND.value(), result.getResponse().getStatus());
-        assertEquals("", result.getResponse().getContentAsString());
+        assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
+        assertEquals("[]", result.getResponse().getContentAsString());
     }
     
     @Test
