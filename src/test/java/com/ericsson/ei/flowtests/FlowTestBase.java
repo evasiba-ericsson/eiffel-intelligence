@@ -152,7 +152,7 @@ public class FlowTestBase {
     @Test
     public void flowTest() {
         try {
-            String queueName = rmqHandler.getQueueName();
+            String queueName = rmqHandler.getQueueName1();
             Channel channel = conn.createChannel();
             String exchangeName = "ei-poc-4";
             createExchange(exchangeName);
@@ -183,18 +183,21 @@ public class FlowTestBase {
     }
 
     protected void setUpQueues() {
-        String queueName = rmqHandler.getQueueName();
+        String queueName = rmqHandler.getQueueName1();
+        String queueName2 = rmqHandler.getQueueName2();
+        String rk = rmqHandler.mainQueueRoutingKey();
         String exteralWaitlisQueueName = rmqHandler.getExternalWaitlistQueueName();
         String waitlisQueueName = rmqHandler.getWaitlistQueueName();
-        declareAndBindQueue(exteralWaitlisQueueName);
-        declareAndBindQueue(queueName);
-        declareAndBindQueue(waitlisQueueName);
+        declareAndBindQueue(exteralWaitlisQueueName, exteralWaitlisQueueName);
+        declareAndBindQueue(queueName, rk);
+        declareAndBindQueue(queueName2, rk);
+        declareAndBindQueue(waitlisQueueName, waitlisQueueName);
     }
 
-    protected void declareAndBindQueue(final String queueName) {
+    protected void declareAndBindQueue(final String queueName, final String rk) {
         Queue queue = new Queue(queueName, false);
         admin.declareQueue(queue);
-        admin.declareBinding(BindingBuilder.bind(queue).to(exchange).with("#"));
+        admin.declareBinding(BindingBuilder.bind(queue).to(exchange).with(rk));
     }
 
     protected ArrayList<String> getEventNamesToSend() {
@@ -231,7 +234,6 @@ public class FlowTestBase {
             ObjectMapper objectmapper = new ObjectMapper();
             JsonNode expectedJson = objectmapper.readTree(expectedDocument);
             JsonNode actualJson = objectmapper.readTree(document);
-            String breakString = "breakHere";
             assertEquals(expectedJson.toString().length(), actualJson.toString().length());
         } catch (IOException e) {
             log.info(e.getMessage(),e);

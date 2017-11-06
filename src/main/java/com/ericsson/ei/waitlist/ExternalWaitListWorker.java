@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.ericsson.ei.rmqhandler.RmqHandler;
+import com.ericsson.ei.rules.RulesObject;
 
 @Component
 public class ExternalWaitListWorker extends WaitListWorkerBase {
@@ -25,5 +26,9 @@ public class ExternalWaitListWorker extends WaitListWorkerBase {
 
     public static Logger getLog() {
         return log;
+    }
+
+    public String getIdentifyRules(RulesObject rulesObject) {
+        return rulesObject.getDownstreamIdentifyRules();
     }
 }

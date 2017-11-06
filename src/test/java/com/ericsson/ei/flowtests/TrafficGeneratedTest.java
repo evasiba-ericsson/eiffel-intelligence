@@ -167,7 +167,7 @@ public class TrafficGeneratedTest {
             List<String> events = getPreparedEventsToSend(eventNames);
             int eventsCount = eventNames.size() * EVENT_PACKAGES;
 
-            String queueName = rmqHandler.getQueueName();
+            String queueName = rmqHandler.getQueueName1();
             String exchange = "ei-poc-4";
             createExchange(exchange, queueName);
             Channel channel = conn.createChannel();

@@ -27,17 +27,27 @@ public class JmesPathInterface {
 
 
     public JsonNode runRuleOnEvent(String rule, String input) {
-        JsonNode event = null;
-        if (input == null)
-            input = "";
-        Expression<JsonNode> expression = jmespath.compile(rule);
         ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode result = null;
         try {
-            event = objectMapper.readValue(input, JsonNode.class);
+            result = objectMapper.readValue("{}", JsonNode.class);
         } catch (Exception e) {
             log.info(e.getMessage(), e);
         }
-        JsonNode result = expression.search(event);
+
+        if (rule != null && !rule.isEmpty()) {
+            JsonNode event = null;
+            if (input == null)
+                input = "";
+            Expression<JsonNode> expression = jmespath.compile(rule);
+            try {
+                event = objectMapper.readValue(input, JsonNode.class);
+            } catch (Exception e) {
+                log.info(e.getMessage(), e);
+            }
+            result = expression.search(event);
+        }
+
         return result;
     }
 }

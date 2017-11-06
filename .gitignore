@@ -15,6 +15,10 @@
 log/
 target/
 
+# Qpid
+work/
+
 # Others
 derby.log
+
 

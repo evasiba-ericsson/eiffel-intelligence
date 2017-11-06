@@ -160,8 +160,23 @@ public class RmqHandler {
     }
 
     @Bean
-    Queue queue() {
-        return new Queue(getQueueName(), true);
+    Queue queue1() {
+        return new Queue(getQueueName1(), true);
+    }
+
+    @Bean
+    Queue queue2() {
+        return new Queue(getQueueName2(), true);
+    }
+
+    @Bean
+    Queue waitlistQueue() {
+        return new Queue(getWaitlistQueueName(), true);
+    }
+
+    @Bean
+    Queue externalWaitlistQueue() {
+        return new Queue(getExternalWaitlistQueueName(), true);
     }
 
     @Bean
@@ -170,13 +185,28 @@ public class RmqHandler {
     }
 
     @Bean
-    Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(routingKey);
+    Binding binding1(Queue queue1, TopicExchange exchange) {
+        return BindingBuilder.bind(queue1).to(exchange).with(mainQueueRoutingKey());
+    }
+
+    @Bean
+    Binding binding2(Queue queue2, TopicExchange exchange) {
+        return BindingBuilder.bind(queue2).to(exchange).with(mainQueueRoutingKey());
+    }
+
+    @Bean
+    Binding waitlistBinding(Queue waitlistQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(waitlistQueue).to(exchange).with(waitlistQueue.getName());
+    }
+
+    @Bean
+    Binding externalWaitlistBinding(Queue externalWaitlistQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(externalWaitlistQueue).to(exchange).with(externalWaitlistQueue.getName());
     }
 
     @Bean
     SimpleMessageListenerContainer bindToQueueForRecentEvents(ConnectionFactory factory, EventHandler eventHandler) {
-        String queueName = getQueueName();
+        String queueName = getQueueName1();
         String waitListQueueName = getWaitlistQueueName();
         container = createMessageListenerContainer(eventHandler, queueName, waitListQueueName);
         return container;
@@ -184,7 +214,7 @@ public class RmqHandler {
 
     @Bean
     SimpleMessageListenerContainer bindToExternalQueueForRecentEvents(ConnectionFactory factory, ExternalEventHandler eventHandler) {
-        String queueName = getQueueName();
+        String queueName = getQueueName2();
         String waitListQueueName = getExternalWaitlistQueueName();
         externalWaitlistContainer = createMessageListenerContainer(eventHandler, queueName, waitListQueueName);
         return externalWaitlistContainer;
@@ -200,25 +230,37 @@ public class RmqHandler {
         return container;
     }
 
-    public String getQueueName() {
-        String durableName = queueDurable ? "durable" : "transient";
-        return domainId + "." + componentName + "." + consumerName + "." + durableName;
+    public String getQueueName1() {
+        return domainId + "." + componentName + "." + consumerName + "." + getDurableName() + ".1";
+    }
+
+    public String getQueueName2() {
+        return domainId + "." + componentName + "." + consumerName + "." + getDurableName() + ".2";
+    }
+
+    public String mainQueueRoutingKey() {
+//        return routingKey;
+        return domainId + "." + componentName + "." + consumerName + "." + getDurableName();
+    }
+
+    public String getDurableName() {
+        return queueDurable ? "durable" : "transient";
     }
 
     public String getWaitlistQueueName() {
         String durableName = queueDurable ? "durable" : "transient";
-        return domainId + "." + componentName + "." + consumerName + "." + durableName + "." + waitlistSufix;
+        return domainId + "." + componentName + "." + consumerName + "." + waitlistSufix + "." + durableName;
     }
 
     public String getExternalWaitlistQueueName() {
         String durableName = queueDurable ? "durable" : "transient";
-        return domainId + "." + componentName + "." + consumerName + "." + durableName + "." + externalWaitlistSufix;
+        return domainId + "." + componentName + "." + consumerName + "." + externalWaitlistSufix + "." + durableName ;
     }
 
     @Bean
     public RabbitTemplate rabbitMqTemplate() {
         if (rabbitTemplate == null) {
-            rabbitTemplate = createRMQTemplate(getQueueName());
+            rabbitTemplate = createRMQTemplate(getWaitlistQueueName());
         }
         return rabbitTemplate;
     }
@@ -227,7 +269,7 @@ public class RmqHandler {
     public RabbitTemplate externalRabbitMqTemplate() {
 
         if (externalRabbitTemplate == null) {
-            externalRabbitTemplate = createRMQTemplate(getQueueName());
+            externalRabbitTemplate = createRMQTemplate(getExternalWaitlistQueueName());
         }
         return externalRabbitTemplate;
     }

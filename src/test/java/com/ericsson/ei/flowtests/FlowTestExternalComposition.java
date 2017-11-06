@@ -1,5 +1,7 @@
 package com.ericsson.ei.flowtests;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,6 +47,12 @@ public class FlowTestExternalComposition extends FlowTestBase {
                 JsonNode actualJson1 = objectmapper.readTree(document1);
                 JsonNode actualJson2 = objectmapper.readTree(document2);
                 JsonNode actualJson3 = objectmapper.readTree(document3);
+                String actualJsonStr1 = actualJson1.get("aggregatedObject").asText();
+                String actualJsonStr2 = actualJson2.get("aggregatedObject").asText();
+                String actualJsonStr3 = actualJson3.get("aggregatedObject").asText();
+                assertEquals(expectedJson1.toString().length(), actualJsonStr1.length());
+                assertEquals(expectedJson2.toString().length(), actualJsonStr2.length());
+                assertEquals(expectedJson3.toString().length(), actualJsonStr3.length());
                 int i = 0;
             } catch (Exception e) {
                 log.info(e.getMessage(),e);
