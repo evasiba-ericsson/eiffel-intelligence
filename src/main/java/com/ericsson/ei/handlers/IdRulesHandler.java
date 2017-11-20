@@ -42,7 +42,7 @@ public class IdRulesHandler {
             if (idsJsonObj != null && idsJsonObj.isArray()) {
                 for (final JsonNode idJsonObj : idsJsonObj) {
                     id = idJsonObj.textValue();
-                    objects = matchIdRulesHandler.fetchObjectsById(rulesObject, id);
+                    objects = matchIdRulesHandler.fetchObjectsById(rulesObject, id, false);
                     for (String object : objects) {
                         extractionHandler.runExtraction(rulesObject, id, event, object);
                     }

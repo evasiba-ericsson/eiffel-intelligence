@@ -101,7 +101,7 @@
     "IdRule": "meta.id",
     "StartEvent": "NO",
     "IdentifyRules" : "",
-    "MatchIdRules": { },
+    "MatchIdRules": {},
     "ExtractionRules" : "",
     "ArrayMergeOptions": "",
     "DownstreamIdentifyRules":"links | [?type=='ELEMENT'].target",

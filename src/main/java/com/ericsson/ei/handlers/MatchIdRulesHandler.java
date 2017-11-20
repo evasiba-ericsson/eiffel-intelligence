@@ -16,10 +16,13 @@ public class MatchIdRulesHandler {
     @Autowired
     private EventToObjectMapHandler eventToObjectMapHandler;
 
-    public ArrayList<String> fetchObjectsById(RulesObject ruleObject, String id) {
-        String matchIdString = ruleObject.getMatchIdRules();
-        String fetchQuerry = replaceIdInRules(matchIdString, id);
-        ArrayList<String> objects = objHandler.findObjectsByCondition(fetchQuerry);
+    public ArrayList<String> fetchObjectsById(RulesObject ruleObject, String id, boolean ignoreRules) {
+        ArrayList<String> objects = new ArrayList<>();
+        if (!ignoreRules) {
+            String matchIdString = ruleObject.getMatchIdRules();
+            String fetchQuerry = replaceIdInRules(matchIdString, id);
+            objects = objHandler.findObjectsByCondition(fetchQuerry);
+        }
         if (objects.isEmpty()) {
             ArrayList<String> objectIds = eventToObjectMapHandler.getObjectsForEventId(id);
             objects = objHandler.findObjectsByIds(objectIds);
@@ -32,8 +35,9 @@ public class MatchIdRulesHandler {
             return matchIdString.replace("%IdentifyRules%", id);
         } else if (matchIdString.contains("%IdentifyRules_objid%")) {
             return matchIdString.replace("%IdentifyRules_objid%", id);
-        } else
+        } else {
             return null;
+        }
     }
 
 }

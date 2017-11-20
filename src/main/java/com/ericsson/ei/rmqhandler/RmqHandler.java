@@ -32,6 +32,8 @@ public class RmqHandler {
     private String host;
     @Value("${rabbitmq.exchange.name}")
     private String exchangeName;
+    @Value("${rabbitmq.waitlist.exchange.name}")
+    private String waitlistExchangeName;
     @Value("${rabbitmq.port}")
     private Integer port;
     @Value("${rabbitmq.tls}")
@@ -147,6 +149,15 @@ public class RmqHandler {
         this.consumerName = consumerName;
     }
 
+
+    public String getWaitlistExchangeName() {
+        return waitlistExchangeName;
+    }
+
+    public void setWaitlistExchangeName(String waitlistExchangeName) {
+        this.waitlistExchangeName = waitlistExchangeName;
+    }
+
     @Bean
     ConnectionFactory connectionFactory() {
         factory = new CachingConnectionFactory(host, port);
@@ -185,6 +196,11 @@ public class RmqHandler {
     }
 
     @Bean
+    TopicExchange waitlistExchange() {
+        return new TopicExchange(waitlistExchangeName);
+    }
+
+    @Bean
     Binding binding1(Queue queue1, TopicExchange exchange) {
         return BindingBuilder.bind(queue1).to(exchange).with(mainQueueRoutingKey());
     }
@@ -195,13 +211,13 @@ public class RmqHandler {
     }
 
     @Bean
-    Binding waitlistBinding(Queue waitlistQueue, TopicExchange exchange) {
-        return BindingBuilder.bind(waitlistQueue).to(exchange).with(waitlistQueue.getName());
+    Binding waitlistBinding(Queue waitlistQueue, TopicExchange waitlistExchange) {
+        return BindingBuilder.bind(waitlistQueue).to(waitlistExchange).with(waitlistQueue.getName());
     }
 
     @Bean
-    Binding externalWaitlistBinding(Queue externalWaitlistQueue, TopicExchange exchange) {
-        return BindingBuilder.bind(externalWaitlistQueue).to(exchange).with(externalWaitlistQueue.getName());
+    Binding externalWaitlistBinding(Queue externalWaitlistQueue, TopicExchange waitlistExchange) {
+        return BindingBuilder.bind(externalWaitlistQueue).to(waitlistExchange).with(externalWaitlistQueue.getName());
     }
 
     @Bean
@@ -239,8 +255,8 @@ public class RmqHandler {
     }
 
     public String mainQueueRoutingKey() {
-//        return routingKey;
-        return domainId + "." + componentName + "." + consumerName + "." + getDurableName();
+        return routingKey;
+//        return domainId + "." + componentName + "." + consumerName + "." + getDurableName() + ".#";
     }
 
     public String getDurableName() {
@@ -248,13 +264,11 @@ public class RmqHandler {
     }
 
     public String getWaitlistQueueName() {
-        String durableName = queueDurable ? "durable" : "transient";
-        return domainId + "." + componentName + "." + consumerName + "." + waitlistSufix + "." + durableName;
+        return domainId + "." + componentName + "." + consumerName + "." + waitlistSufix + "." + getDurableName();
     }
 
     public String getExternalWaitlistQueueName() {
-        String durableName = queueDurable ? "durable" : "transient";
-        return domainId + "." + componentName + "." + consumerName + "." + externalWaitlistSufix + "." + durableName ;
+        return domainId + "." + componentName + "." + consumerName + "." + externalWaitlistSufix + "." + getDurableName() ;
     }
 
     @Bean
@@ -283,8 +297,8 @@ public class RmqHandler {
             rabbitTemplate = new RabbitTemplate(connectionFactory());
         }
 
-        rabbitTemplate.setExchange(exchangeName);
-        rabbitTemplate.setRoutingKey(routingKey);
+        rabbitTemplate.setExchange(waitlistExchangeName);
+        rabbitTemplate.setRoutingKey(queueName);
         rabbitTemplate.setQueue(queueName);
         rabbitTemplate.setConfirmCallback(new ConfirmCallback() {
             @Override

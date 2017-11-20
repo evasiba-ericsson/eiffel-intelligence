@@ -40,7 +40,7 @@ public class ExternalIdRulesHandler {
          if (idsJsonObj != null && idsJsonObj.isArray()) {
              for (final JsonNode idJsonObj : idsJsonObj) {
                  id = idJsonObj.textValue();
-                 objects = matchIdRulesHandler.fetchObjectsById(rulesObject, id);
+                 objects = matchIdRulesHandler.fetchObjectsById(rulesObject, id, true);
                  for (String object:objects) {
                      externalExtractionHandler.runExtraction(rulesObject, id, event, object);
                  }

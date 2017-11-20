@@ -18,6 +18,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
 
+/**
+ * @author evasiba
+ *
+ */
 public class WaitListStorageHandlerBase {
 
     @Value("${database.name}") private String databaseName;
@@ -98,5 +102,13 @@ public class WaitListStorageHandlerBase {
 
     private void updateTestEventCount(boolean increase) {
 
+    }
+
+    /**
+     * @return the amount of events in the wait list
+     */
+    public Integer waitListCount() {
+        ArrayList<String> list = getWaitList();
+        return list.size();
     }
 }

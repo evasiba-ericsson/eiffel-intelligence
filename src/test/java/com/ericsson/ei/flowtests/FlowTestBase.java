@@ -62,6 +62,7 @@ public class FlowTestBase {
     static MongoClient mongoClient = null;
     static RabbitAdmin admin;
     static TopicExchange exchange;
+    static TopicExchange waitlistExchange;
 
     public static class AMQPBrokerManager {
         private String path;
@@ -154,8 +155,10 @@ public class FlowTestBase {
         try {
             String queueName = rmqHandler.getQueueName1();
             Channel channel = conn.createChannel();
-            String exchangeName = "ei-poc-4";
-            createExchange(exchangeName);
+            String exchangeName = rmqHandler.getExchangeName();
+            String waitlistExchangeName = rmqHandler.getWaitlistExchangeName();
+            exchange = createExchange(exchangeName);
+            waitlistExchange = createExchange(waitlistExchangeName);
             setUpQueues();
 
             ArrayList<String> eventNames = getEventNamesToSend();
@@ -174,12 +177,14 @@ public class FlowTestBase {
         }
     }
 
-    protected void createExchange(final String exchangeName) {
+    protected TopicExchange createExchange(final String exchangeName) {
         final CachingConnectionFactory ccf = new CachingConnectionFactory(cf);
         admin = new RabbitAdmin(ccf);
-        exchange = new TopicExchange(exchangeName);
+        TopicExchange exchange = new TopicExchange(exchangeName);
         admin.declareExchange(exchange);
+
         ccf.destroy();
+        return exchange;
     }
 
     protected void setUpQueues() {
@@ -188,13 +193,13 @@ public class FlowTestBase {
         String rk = rmqHandler.mainQueueRoutingKey();
         String exteralWaitlisQueueName = rmqHandler.getExternalWaitlistQueueName();
         String waitlisQueueName = rmqHandler.getWaitlistQueueName();
-        declareAndBindQueue(exteralWaitlisQueueName, exteralWaitlisQueueName);
-        declareAndBindQueue(queueName, rk);
-        declareAndBindQueue(queueName2, rk);
-        declareAndBindQueue(waitlisQueueName, waitlisQueueName);
+        declareAndBindQueue(exteralWaitlisQueueName, exteralWaitlisQueueName, waitlistExchange);
+        declareAndBindQueue(queueName, rk, exchange);
+        declareAndBindQueue(queueName2, rk, exchange);
+        declareAndBindQueue(waitlisQueueName, waitlisQueueName, waitlistExchange);
     }
 
-    protected void declareAndBindQueue(final String queueName, final String rk) {
+    protected void declareAndBindQueue(final String queueName, final String rk, final TopicExchange exchange) {
         Queue queue = new Queue(queueName, false);
         admin.declareQueue(queue);
         admin.declareBinding(BindingBuilder.bind(queue).to(exchange).with(rk));
@@ -238,6 +243,5 @@ public class FlowTestBase {
         } catch (IOException e) {
             log.info(e.getMessage(),e);
         }
-
     }
 }

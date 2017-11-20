@@ -57,7 +57,7 @@ public class WaitListWorkerBase {
                 JsonNode ids = jmesPathInterface.runRuleOnEvent(idRule, event);
                 if (ids.isArray()) {
                     for (final JsonNode idJsonObj : ids) {
-                        ArrayList<String> objects = matchIdRulesHandler.fetchObjectsById(rulesObject, idJsonObj.textValue());
+                        ArrayList<String> objects = matchIdRulesHandler.fetchObjectsById(rulesObject, idJsonObj.textValue(), false);
                         if (objects.size() > 0) {
                             publishToWaitList(rmqHandler, event);
                             getWaitlistStorageHandler().dropDocumentFromWaitList(document);

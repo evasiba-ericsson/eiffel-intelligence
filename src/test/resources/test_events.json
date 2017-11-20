@@ -1132,6 +1132,45 @@
         }
     },
 
+    "event_EiffelTestCaseTriggeredEvent_1" :
+    {
+        "data": {
+          "customData": [
+            {
+              "key": "name",
+              "value": "TCT7"
+            },
+            {
+              "key": "iteration",
+              "value": 1
+            }
+          ],
+          "testCase": {
+            "id": "TC5",
+              "uri": "https://other-tm.company.com/testCase/TC5",
+              "tracker": "My Other Test Management System"
+          }
+        },
+        "meta": {
+          "type": "EiffelTestCaseTriggeredEvent",
+          "source": {
+            "domainId": "example.domain"
+          },
+          "version": "1.0.0",
+          "id": "6d3df0e0-404d-46ee-ab4f-v11dr57148f4",
+          "time": 1490777327230
+        },
+        "links": [
+          {
+            "type": "CONTEXT",
+            "target": "bebdb0b7-f59e-4b77-ba8e-3912593d0153"
+          },
+          {
+            "type": "IUT",
+            "target": "ccce572c-c364-441e-abc9-b62fed080ca2"
+          }
+        ]
+      },
 
 "event_EiffelTestCaseStartedEvent_1" :
     {
@@ -1150,8 +1189,8 @@
                 "type": "CONTEXT"
             },
             {
-                "target": "ccce572c-c364-441e-abc9-b62fed080ca2",
-                "type": "IUT"
+                "target": "6d3df0e0-404d-46ee-ab4f-v11dr57148f4",
+                "type": "TEST_CASE_EXECUTION"
             }
         ],
         "data": {

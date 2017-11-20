@@ -131,7 +131,7 @@ public class TestWaitListWorker {
 
     @Test
     public void testRunWithoutMatchObjects() {
-        Mockito.when(matchId.fetchObjectsById(Mockito.anyObject(), Mockito.anyString())).thenReturn(newList);
+        Mockito.when(matchId.fetchObjectsById(Mockito.anyObject(), Mockito.anyString(), false)).thenReturn(newList);
         try {
             waitListWorker.run();
             assertTrue(true);
@@ -143,7 +143,7 @@ public class TestWaitListWorker {
 
     @Test
     public void testRunWithMatchbjects() {
-        Mockito.when(matchId.fetchObjectsById(Mockito.anyObject(), Mockito.anyString())).thenReturn(list);
+        Mockito.when(matchId.fetchObjectsById(Mockito.anyObject(), Mockito.anyString(), false)).thenReturn(list);
         try {
             waitListWorker.run();
             assertTrue(true);

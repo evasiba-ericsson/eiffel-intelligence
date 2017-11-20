@@ -5,14 +5,17 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.ericsson.ei.waitlist.ExternalWaitListStorageHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -22,6 +25,9 @@ public class FlowTestExternalComposition extends FlowTestBase {
 
      private static Logger log = LoggerFactory.getLogger(FlowTest.class);
      static protected String inputFilePath = "src/test/resources/aggregatedExternalComposition.json";
+
+     @Autowired
+     ExternalWaitListStorageHandler externalWaitListStorageHandler;
 
         protected ArrayList<String> getEventNamesToSend() {
              ArrayList<String> eventNames = new ArrayList<>();
@@ -54,6 +60,20 @@ public class FlowTestExternalComposition extends FlowTestBase {
                 assertEquals(expectedJson2.toString().length(), actualJsonStr2.length());
                 assertEquals(expectedJson3.toString().length(), actualJsonStr3.length());
                 int i = 0;
+            } catch (Exception e) {
+                log.info(e.getMessage(),e);
+            }
+
+        }
+
+        protected void waitForEventsToBeProcessed(int eventsCount) {
+            super.waitForEventsToBeProcessed(eventsCount);
+            int waitlistCount = externalWaitListStorageHandler.waitListCount();
+            while (waitlistCount > 1) {
+                waitlistCount = externalWaitListStorageHandler.waitListCount();
+            }
+            try {
+                TimeUnit.MILLISECONDS.sleep(100);
             } catch (Exception e) {
                 log.info(e.getMessage(),e);
             }
