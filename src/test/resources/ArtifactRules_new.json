@@ -13,8 +13,8 @@
     "DownstreamExtractionRules" : "{artifacts: [{id : meta.id}]}",
     "ArrayMergeOptions": "",
     "HistoryIdentifyRules":"links | [?type=='COMPOSITION'].target",
-    "HistoryExtractionRules":"{internalComposition:{artifacts: [{id : meta.id}]}}",
-    "HistoryPathRules": "{artifacts: {id: meta.id}}",
+    "HistoryExtractionRules":"{id : meta.id, gav : data.gav, fileInformation : data.fileInformation}",
+    "HistoryPathRules": "{artifacts: [{id: meta.id}]}",
     "ProcessRules" : null,
     "ProcessFunction" : null
   },
@@ -27,6 +27,7 @@
     "IdentifyRules" : "links | [?type=='ARTIFACT'].target",
     "MatchIdRules": {"_id": "%IdentifyRules_objid%"},
     "ExtractionRules" : "{ publications :[ { eventId : meta.id, time : meta.time, locations : data.locations  }] }",
+    "MergeResolverRules" : "{publications :{eventID:%IdentifyRules%}}",
     "ArrayMergeOptions": "",
     "HistoryIdentifyRules": "",
     "HistoryExtractionRules": "",

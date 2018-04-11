@@ -54,7 +54,7 @@ public class FlowTest extends FlowTestBase {
     @Before
     public void before() throws IOException {
         upStreamEventsHandler.setEventRepositoryQueryService(erQueryService);
-        inputFilePath = "src/test/resources/AggregatedDocumentInternalComposition.json";
+        inputFilePath = "src/test/resources/AggregatedDocumentInternalCompositionLatest.json";
 
         final URL upStreamResult = this.getClass().getClassLoader().getResource(upStreamResultFile);
         ObjectMapper objectMapper = new ObjectMapper();

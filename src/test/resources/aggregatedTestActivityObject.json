@@ -47,10 +47,6 @@
       }
     ],
     "test_cases": [
-      {
-        "ongoing": "false",
-        "test_data": null,
-        "test_cases": [
           {
             "conclusion": "SUCCESSFUL",
             "ongoing": "true",
@@ -59,9 +55,6 @@
             "trigger_event_id": "v46ef19a-20ga-4d2y-h9fa-8763ae6kde47"
           }
         ],
-        "trigger_event_id": "v46ef19a-20ga-4d2y-h9fa-8763ae6kde47"
-      }
-    ],
     "TemplateName": "TEST_EXECUTION_1",
     "id": "b46ef12d-25gb-4d7y-b9fd-8763re66de47",
     "time": 1234567890,

@@ -16,9 +16,7 @@
 */
 package com.ericsson.ei.flowtests;
 
-import com.ericsson.ei.erqueryservice.ERQueryService;
 import com.ericsson.ei.handlers.ObjectHandler;
-import com.ericsson.ei.handlers.UpStreamEventsHandler;
 import com.ericsson.ei.mongodbhandler.MongoDBHandler;
 import com.ericsson.ei.rmqhandler.RmqHandler;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,8 +27,14 @@ import com.mongodb.client.MongoDatabase;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.mongo.tests.MongodForTestsFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.qpid.server.Broker;
 import org.apache.qpid.server.BrokerOptions;
@@ -38,9 +42,6 @@ import org.json.JSONException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,11 +53,8 @@ import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
+import de.flapdoodle.embed.mongo.distribution.Version;
+import de.flapdoodle.embed.mongo.tests.MongodForTestsFactory;
 
 public class FlowTestBase {
 
@@ -71,8 +69,10 @@ public class FlowTestBase {
     @Autowired
     private MongoDBHandler mongoDBHandler;
 
-    @Value("${database.name}") private String database;
-    @Value("${event_object_map.collection.name}") private String event_map;
+    @Value("${database.name}")
+    private String database;
+    @Value("${event_object_map.collection.name}")
+    private String event_map;
 
     public static File qpidConfig = null;
     static AMQPBrokerManager amqpBrocker;
@@ -152,22 +152,22 @@ public class FlowTestBase {
     }
 
     public static void setUpEmbeddedMongo() throws Exception {
-         testsFactory = MongodForTestsFactory.with(Version.V3_4_1);
-         mongoClient = testsFactory.newMongo();
-         String port = "" + mongoClient.getAddress().getPort();
-         System.setProperty("mongodb.port", port);
+        testsFactory = MongodForTestsFactory.with(Version.V3_4_1);
+        mongoClient = testsFactory.newMongo();
+        String port = "" + mongoClient.getAddress().getPort();
+        System.setProperty("mongodb.port", port);
     }
 
     @AfterClass
     public static void tearDown() throws Exception {
-         if (amqpBrocker != null)
-             amqpBrocker.stopBroker();
+        if (amqpBrocker != null)
+            amqpBrocker.stopBroker();
         try {
             conn.close();
         } catch (Exception e) {
-            //We try to close the connection but if
-            //the connection is closed we just receive the
-            //exception and go on
+            // We try to close the connection but if
+            // the connection is closed we just receive the
+            // exception and go on
         }
     }
 
@@ -182,17 +182,17 @@ public class FlowTestBase {
             ArrayList<String> eventNames = getEventNamesToSend();
             testParametersChange();
             int eventsCount = eventNames.size();
-            for(String eventName : eventNames) {
+            for (String eventName : eventNames) {
                 JsonNode eventJson = parsedJason.get(eventName);
                 String event = eventJson.toString();
-                channel.basicPublish(exchangeName, queueName,  null, event.getBytes());
+                channel.basicPublish(exchangeName, queueName, null, event.getBytes());
             }
 
             // wait for all events to be processed
             waitForEventsToBeProcessed(eventsCount);
             checkResult();
         } catch (Exception e) {
-            log.info(e.getMessage(),e);
+            log.info(e.getMessage(), e);
         }
     }
 
@@ -203,7 +203,7 @@ public class FlowTestBase {
         parsedJason = objectmapper.readTree(jsonFileContent);
     }
 
-    protected void setSpecificTestCaseParameters(){
+    protected void setSpecificTestCaseParameters() {
     }
 
     protected void createExchange(final String exchangeName, final String queueName) {
@@ -223,7 +223,7 @@ public class FlowTestBase {
     }
 
     // count documents that were processed
-    private long countProcessedEvents(String database, String collection){
+    private long countProcessedEvents(String database, String collection) {
         MongoDatabase db = mongoClient.getDatabase(database);
         MongoCollection table = db.getCollection(collection);
         long countedDocuments = table.count();
@@ -239,14 +239,14 @@ public class FlowTestBase {
             try {
                 TimeUnit.MILLISECONDS.sleep(1000);
             } catch (Exception e) {
-                log.info(e.getMessage(),e);
+                log.info(e.getMessage(), e);
             }
         }
     }
 
     protected void checkResult() throws JSONException {
-         String document = objectHandler.findObjectById("6acc3c87-75e0-4b6d-88f5-b1a5d4e62b43");
-         String expectedDocument;
+        String document = objectHandler.findObjectById("6acc3c87-75e0-4b6d-88f5-b1a5d4e62b43");
+        String expectedDocument;
         try {
             expectedDocument = FileUtils.readFileToString(new File(inputFilePath), "UTF-8");
             ObjectMapper objectmapper = new ObjectMapper();
@@ -256,7 +256,7 @@ public class FlowTestBase {
             System.out.println(actualJson);
             JSONAssert.assertEquals(expectedJson.toString(), actualJson.toString(), true);
         } catch (IOException e) {
-            log.info(e.getMessage(),e);
+            log.info(e.getMessage(), e);
         }
 
     }
