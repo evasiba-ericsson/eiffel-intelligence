@@ -102,7 +102,7 @@ public class MergePrepare {
         return str;
     }
 
-    public static String longestCommonSubstring1(String s1, String s2) {
+    public static String longestCommonSubstring(String s1, String s2) {
         int start = 0;
         int max = 0;
         for (int i = 0; i < s1.length(); i++) {
@@ -122,7 +122,7 @@ public class MergePrepare {
         return s1.substring(start, (start + max));
     }
 
-    public static String longestCommonSubstring(String s1, String s2) {
+    public static String longestCommonSubstring1(String s1, String s2) {
         String[] s1Substrings = s1.split("\\.");
         String[] s2Substrings = s2.split("\\.");
 
@@ -150,7 +150,7 @@ public class MergePrepare {
                 if (!firstPath.isEmpty()) {
                     String firstPathNoIndexes = removeArrayIndexes(firstPath);
                     String[] firstPathSubstrings = firstPathNoIndexes.split("\\.");
-                    ArrayList<String> fp = new ArrayList(Arrays.asList(firstPathSubstrings));
+                    ArrayList<String> fp = new ArrayList<String>(Arrays.asList(firstPathSubstrings));
                     fp.remove(fp.size() - 1);
                     firstPathTrimmed = StringUtils.join(fp, ":{");
                     String secondRuleComplete = "{" + firstPathTrimmed + ":" + secondRule + "}";
@@ -180,7 +180,7 @@ public class MergePrepare {
 
     public String trimLastInPath(String path, String delimiter) {
         String[] firstPathSubstrings = path.split("\\.");
-        ArrayList<String> fp = new ArrayList(Arrays.asList(firstPathSubstrings));
+        ArrayList<String> fp = new ArrayList<String>(Arrays.asList(firstPathSubstrings));
         fp.remove(fp.size() - 1);
         return StringUtils.join(fp, delimiter);
     }
