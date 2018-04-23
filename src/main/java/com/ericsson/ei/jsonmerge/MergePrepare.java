@@ -122,19 +122,6 @@ public class MergePrepare {
         return s1.substring(start, (start + max));
     }
 
-    public static String longestCommonSubstring1(String s1, String s2) {
-        String[] s1Substrings = s1.split("\\.");
-        String[] s2Substrings = s2.split("\\.");
-
-        ArrayList<String> set1 = new ArrayList(Arrays.asList(s1Substrings));
-        ArrayList<String> set2 = new ArrayList(Arrays.asList(s2Substrings));
-        set1.retainAll(set2);
-        String[] commonSubstrings = new String[set1.size()];
-        commonSubstrings = (String[]) set1.toArray(commonSubstrings);
-        String commonPath = StringUtils.join(commonSubstrings, ".");
-        return commonPath;
-    }
-
     // TODO fix so that we do not need to pass both originObject and
     // stringObject which are
     // different representations of the same object.
@@ -293,11 +280,9 @@ public class MergePrepare {
                     if (index == 0) {
                         String s1 = pathsContainingRule.get(index);
                         String s2 = pathsContainingRule.get(index + 1);
-                        String temp = longestCommonSubstring1(s1, s2);
                         longestCommonString = longestCommonSubstring(s1, s2);
                     } else {
                         String s1 = pathsContainingRule.get(index + 1);
-                        String temp = longestCommonSubstring1(s1, longestCommonString);
                         longestCommonString = longestCommonSubstring(s1, longestCommonString);
                     }
                 }
@@ -307,11 +292,6 @@ public class MergePrepare {
                 // remove index at the end
                 String pattern = "\\.\\d*$";
                 longestCommonString = longestCommonString.replaceAll(pattern, "");
-                // if (longestCommonString.matches(".*\\.0")) {
-                // longestCommonString = longestCommonString.substring(0,
-                // longestCommonString.length() - 2);
-                // int breakHere = 0;
-                // }
                 if (longestCommonString.startsWith(".")) {
                     longestCommonString = "";
                 }
@@ -322,7 +302,6 @@ public class MergePrepare {
                 try {
                     ObjectMapper objectmapper = new ObjectMapper();
                     JsonNode parsedJson = objectmapper.readTree(objectJSONObject.toString());
-                    // Object value = objectJSONObject.get(mergePath);
                     mergePath = "/" + mergePath.replaceAll("\\.", "\\/");
                     Object value = parsedJson.at(mergePath);
                     if (value instanceof ArrayNode) {
