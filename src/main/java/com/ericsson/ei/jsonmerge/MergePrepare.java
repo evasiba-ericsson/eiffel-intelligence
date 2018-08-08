@@ -131,6 +131,8 @@ public class MergePrepare {
     // stringObject which are
     // different representations of the same object.
     public String getMergePathFromArrayMergeRules(String originObject, String mergeRule, String stringObject) {
+       log.debug(" mergeRules are : " + mergeRule);
+       log.debug(" originObject is : " + originObject);
         try {
             JSONArray ruleJSONArray = new JSONArray(mergeRule);
             String firstRule = ruleJSONArray.getString(0);
@@ -454,17 +456,17 @@ public class MergePrepare {
             Object valueForKey = null;
             for (int i = 0; i < mergePathIndex; i++) {
                 String key = mergePathArray.getString(i);
-                if (valueForKey == null) {
+                if (valueForKey == null && originJSONObject.has(key)) {
                     valueForKey = originJSONObject.get(key);
                 } else {
-                    if (valueForKey instanceof JSONObject) {
+                    if (valueForKey instanceof JSONObject && ((JSONObject) valueForKey).has(key)) {
                         valueForKey = ((JSONObject) valueForKey).get(key);
                     } else if (valueForKey instanceof JSONArray) {
                         valueForKey = ((JSONArray) valueForKey).get(Integer.parseInt(key));
                     }
                 }
             }
-            if (valueForKey.getClass().equals(JSONArray.class)) {
+            if (valueForKey != null && valueForKey.getClass().equals(JSONArray.class)) {
                 size = ((JSONArray) valueForKey).length();
                 if ((Integer.parseInt(pathElement) + 1) > size) {
                     return Integer.parseInt(pathElement) + 1;
